@@ -1,0 +1,66 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+{% block title %}
+  {% if category %} {{ category.name }} {% else %} SeriesStore {% endif %}
+{% endblock %}
+{% block content %}
+  <div id="sidebar" class="col-sm-3">
+    <h3>Categories</h3>
+    <ul>
+      <li {% if not category %} class="selected" {% endif %}>
+        <a href="{% url "shop:ProductList" %}">All</a>
+      </li>
+      {% for cat in categories %}
+        <li {% if category.slug == cat.slug %} class="selected" {% endif %}>
+          <a href="{{ cat.get_absolute_url }}">{{ cat.name }}</a>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div id="main" class="product_list col-sm-9">
+    <h1>{% if category %}{{ category.name }}{% else %}All series{% endif %}</h1>
+    <table class="table">
+        <tbody>
+            <tr>
+                {% with order_by=request.GET.order_by reverse=request.GET.reverse %}
+                <th><a href="{{ category.get_absolute_url }}?order_by=name{% if order_by == 'name' and reverse != '1' %}&amp;reverse=1{% endif %}">
+                            Name {% if order_by == 'name' and reverse != '1' %}&uarr;{% elif order_by == 'name' and reverse == '1' %}&darr;{% endif %}</a></th>
+                <th><a href="{{ category.get_absolute_url }}?order_by=price{% if order_by == 'price' and reverse != '1' %}&amp;reverse=1{% endif %}">
+                            Price {% if order_by == 'price' and reverse != '1' %}&uarr;{% elif order_by == 'price' and reverse == '1' %}&darr;{% endif %}</a></th>
+                <th><a href="{{ category.get_absolute_url }}?order_by=created{% if order_by == 'created' and reverse != '1' %}&amp;reverse=1{% endif %}">
+                            Created {% if order_by == 'created' and reverse != '1' %}&uarr;{% elif order_by == 'created' and reverse == '1' %}&darr;{% endif %}</a></th>
+                <th><a href="{{ category.get_absolute_url }}?order_by=updated{% if order_by == 'updated' and reverse != '1' %}&amp;reverse=1{% endif %}">
+                            Updated {% if order_by == 'updated' and reverse != '1' %}&uarr;{% elif order_by == 'updated' and reverse == '1' %}&darr;{% endif %}</a></th>
+                {% endwith %}
+            </tr>
+        </tbody>
+    </table>
+    <div class="items row">
+      {% for product in products %}
+        <div class="item col-sm-4">
+          <a href="{{ product.get_absolute_url }}">
+            <img src="{% if product.image %}{{ product.image.url }}{% else %}{% static "img/no-image.jpg"%}{% endif %}" class="img-responsive">
+          </a>
+          <a href="{{ product.get_absolute_url }}">{{ product.name }}</a><br>
+          {{ product.price }} $.
+        </div>
+      {% endfor %}
+    </div>
+
+    {% if products.has_other_pages %}
+    {% with order_by=request.GET.order_by reverse=request.GET.reverse %}
+    <nav>
+        <ul class="pagination">
+            <li><a href="{{ category.get_absolute_url }}?page=1&amp;order_by={{ order_by }}&amp;reverse={{ reverse }}">&laquo;</a></li>
+            {% for p in products.paginator.page_range %}
+            <li {% if products.number == p %}class="active"{% endif %}>
+                <a href="{{ category.get_absolute_url }}?page={{ p }}&amp;order_by={{ order_by }}&amp;reverse={{ reverse }}">{{ p }}</a>
+            </li>
+            {% endfor %}
+            <li><a href="{{ category.get_absolute_url }}?page={{ products.paginator.num_pages }}&amp;order_by={{ order_by }}&amp;reverse={{ reverse }}">&raquo;</a></li>
+        </ul>
+    </nav>
+    {% endwith %}
+    {% endif %}
+  </div>
+{% endblock %}
